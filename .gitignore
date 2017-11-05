@@ -1,4 +1,4 @@
 *.swp
 .DS_STORE
 .env
-
+.vscode/
