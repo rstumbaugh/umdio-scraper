@@ -1,62 +1,51 @@
 import re
-import requests
-from bs4 import BeautifulSoup
+import sys
+
+def flush():
+	sys.stdout.flush()
 
 class Course:
-	def __init__(self, id):
-		self.id = id
-		self.semesters = []
+	def __init__(self, json):
+		self.id = json['course_id']
+		self.name = json['name']
+		self.credits = json['credits']
+		self.semesters = [json['semester']]
+		# self.gen_ed = json['gen_ed'] UMD.io has not updated gen ed parsing
+		self.core = json['core']
+		self.dept_id = json['dept_id']
+		self.description = json['description']
+		self.relationships = json['relationships']
 	
 	def __str__(self):
 		return '{}: {} ({} credits)'.format(self.id, self.name, self.credits)
 
-def parse_course(text):
-	course = Course(text['id'])
-	course.name = text.find('span', class_='course-title').text.strip()
-	course.credits = text.find(class_='course-min-credits').text.strip()
-	
-	approved_texts = text.find_all(class_='approved-course-text')
-	other_text = text.find(class_='course-text')
-
-	if (len(approved_texts) > 0):
-		body = ''.join([div.text for div in approved_texts]) + str(other_text)
-	else:
-		body = str(other_text)
-
-	print('{}: {}'.format(text['id'], body))
-
-	return course
-
 def get_courses(semesters):
-	# get URLs for each semester & department
-	department_urls = ['https://ntst.umd.edu/soc/201608/CMSC']
-	# for semester in semesters:
-	# 	print('getting departments for {}'.format(semester))
-	# 	response = requests.get('https://ntst.umd.edu/soc/{}/'.format(semester))
-	# 	soup = BeautifulSoup(response.text, 'html.parser')
-	# 	depts = soup.find_all('span', class_='prefix-abbrev')
+	api_root = 'http://api.umd.io/v0/courses'
 
-	# 	for dept in depts:
-	# 		department_urls.append('https://ntst.umd.edu/soc/{}/{}'.format(semester, dept.text))
+	def get_url(semester, page):
+		return '{}?semester={}&page={}&per_page=100'.format(api_root, semester, page)
 
-	# get courses from each URL
 	courses = {}
-	
-	for url in department_urls[:1]:
-		match = re.match(r'https://ntst\.umd\.edu/soc/(\d{6})/([A-Z]{4})', url)
-		(semester, dept_id) = match.groups()
-		print('scraping courses for {} ({})'.format(dept_id, semester))
+	for semester in semesters:
+		page = 1
+		url = get_url(semester, page)
 		response = requests.get(url)
-		soup = BeautifulSoup(response.text, 'html.parser')
 
-		course_data = soup.find_all('div', class_='course')
-		course_objects = [parse_course(course) for course in course_data]
-
-		# if course already found, update 'semesters'; otherwise, add it as a new course
-		for course in course_objects:
-			if course.id in courses:
-				courses[course.id].semesters.append(course.semester)
-			else:
-				courses[course.id] = course
-
+		current_dept = 'AASP'
+		while int(response.status_code) != 500:
+			print('grabbing courses for {} ({})'.format(current_dept, semester))
+			flush()
+			json = response.json()
+			for course in json:
+				course_object = Course(course)
+				if course['course_id'] in courses:
+					courses.semesters.append(course_object.semester)
+				else:
+					courses[course['course_id']] = course_object
+				if course['dept_id'] != current_dept:
+					current_dept = course['dept_id']
+			page += 1
+			url = get_url(semester, page)
+			response = requests.get(url)
+	
 	return courses
