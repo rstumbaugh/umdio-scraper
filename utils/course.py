@@ -38,14 +38,13 @@ def get_courses(semesters):
 		page = 1
 		url = get_url(semester, page)
 		response = requests.get(url)
-		while int(response.status_code) != 500:
+		while int(response.status_code) not in [500, 404]:
 			json = response.json()
 			for course in json:
-				course_object = Course(course)
 				if course['course_id'] in courses:
-					courses.semesters.append(course_object.semester)
+					courses[course['course_id']].semesters.append(semester)
 				else:
-					courses[course['course_id']] = course_object
+					courses[course['course_id']] = Course(course)
 
 			page += 1
 			url = get_url(semester, page)
