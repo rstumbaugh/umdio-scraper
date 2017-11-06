@@ -34,8 +34,8 @@ def get_gen_eds(courses):
 		soup = BeautifulSoup(response.text, 'html.parser')
 
 		for course_div in soup.find_all('div', class_='course'):
-			if not course_div:
-				print('no course div found')
+			if course_div['id'] not in courses:
+				print('**** not found in umd.io: {} ({}) ****'.format(course_div['id'], semester))
 				continue
 
 			gen_ed_block = course_div.find(class_='gen-ed-codes-group')
