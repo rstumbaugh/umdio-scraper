@@ -4,19 +4,20 @@ import sys
 
 class Course:
 	def __init__(self, json):
-		self.id = json['course_id']
+		self.course_id = json['course_id']
 		self.name = json['name']
 		self.credits = json['credits']
 		self.semesters = [json['semester']]
 		self.gen_ed = []
 		self.core = json['core']
 		self.dept_id = json['dept_id']
-		self.description = json['description']
+		self.dept_name = json['department']
+		self.description = str(json['description'])
 		self.relationships = json['relationships']
 		self.professors = []
-	
-	def __str__(self):
-		return '{}: {} ({} credits)'.format(self.id, self.name, self.credits)
+
+	def as_dict(self):
+		return self.__dict__
 
 def get_courses(semesters):
 	'''
