@@ -37,7 +37,7 @@ def get_professors(courses, semesters):
 		page = 1
 		url = get_url(semester, page)
 		response = requests.get(url)
-		while response.status_code != 500:
+		while int(response.status_code) not in [404, 500]:
 			json = response.json()
 			for professor_json in json:
 				prof = check_professor_name(professor_json['name'])
@@ -50,7 +50,8 @@ def get_professors(courses, semesters):
 
 				# for each course, add professor to course and add course to professor
 				for course_id in course_ids:
-					courses[course_id].professors.append(prof)
+					if prof not in course[course_id].professors:
+						courses[course_id].professors.append(prof)
 					if course_id not in professors[prof].courses:
 						professors[prof].courses.append(course_id)
 
