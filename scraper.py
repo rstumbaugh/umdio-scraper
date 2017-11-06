@@ -40,5 +40,9 @@ prep_credentials()
 link_ratings(courses, '')
 cleanup_credentials()
 
-# insert courses into DB
+# insert courses & departments into DB
+unique_depts = {(course.dept_id, course.dept_name) for course in courses.values()}
+depts = [{'dept_id': dept_id, 'department': name} for (dept_id, name) in unique_depts]
+
 insert_courses(db, courses)
+insert_departments(db, depts)
