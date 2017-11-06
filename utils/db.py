@@ -11,4 +11,7 @@ def insert_professors(db, professors):
 	print('inserting profs...')
 
 def insert_departments(db, departments):
-	print('inserting depts...')
+	collection = db.departments
+	collection.delete_many({})
+	result = collection.insert_many(departments)
+	print('{} department records inserted'.format(len(result.inserted_ids)))
