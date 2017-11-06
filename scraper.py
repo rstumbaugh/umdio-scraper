@@ -8,7 +8,7 @@ from utils.course import get_courses
 from utils.professor import get_professors
 from utils.gen_ed import get_gen_eds
 from utils.db import insert_courses, insert_professors, insert_departments
-from utils.rating import prep_credentials, link_ratings, cleanup_credentials
+from utils.rating import link_ratings
 
 client = MongoClient(env.get('DB_URI'))
 db = client[env.get('DB_NAME')]
@@ -22,6 +22,7 @@ if current_year >= 9:
 
 years = range(current_year - 3, current_year + 1)
 semesters = [str(year) + sem for year in years for sem in semester_codes]
+#semesters = ['201608']
 
 # get courses and professors for all semesters
 courses = get_courses(semesters)
@@ -36,9 +37,7 @@ sys.stdout.flush()
 courses = get_gen_eds(courses)
 
 # link ratings to all courses
-prep_credentials()
 link_ratings(courses, '')
-cleanup_credentials()
 
 # insert courses & departments into DB
 unique_depts = {(course.dept_id, course.dept_name) for course in courses.values()}
