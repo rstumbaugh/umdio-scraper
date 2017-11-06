@@ -17,6 +17,7 @@ def check_professor_name(name):
 		return 'Thomas Reinhardt'
 	if re.search(r'TBA', name):
 		return ''
+	return name
 
 def get_professors(courses, semesters):
 	'''
