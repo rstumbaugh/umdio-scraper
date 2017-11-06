@@ -50,7 +50,7 @@ def get_professors(courses, semesters):
 
 				# for each course, add professor to course and add course to professor
 				for course_id in course_ids:
-					if prof not in course[course_id].professors:
+					if prof not in courses[course_id].professors:
 						courses[course_id].professors.append(prof)
 					if course_id not in professors[prof].courses:
 						professors[prof].courses.append(course_id)
