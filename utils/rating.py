@@ -1,6 +1,6 @@
 import json
 import firebase_admin
-from firebase_admin import credentials
+from firebase_admin import credentials, db
 import os
 from os import environ as env
 
@@ -23,10 +23,25 @@ def cleanup_credentials():
 	os.remove(credentials_file)
 	print('cleaned up credentials')
 
-def link_ratings(courses):
+def link_ratings(courses, professors):
 	'''
 		Adds average ratings & rating count to each course in courses
 	'''
-	cred = credentials.Certificate(credentials_file)
-	firebase_admin.initialize_app(cred)
+	print('linking course ratings...')
 
+	cred = credentials.Certificate(credentials_file)
+	app = firebase_admin.initialize_app(
+		cred, 
+		options={ 'databaseURL': env.get('FIREBASE_DB_URL') }
+	)
+	
+	response = db.reference('/courses').get()
+	for course, obj in response.items():
+		if course not in courses:
+			continue
+		courses[course].avg_diff = obj['avgDiff']
+		courses[course].avg_int = obj['avgInt']
+		courses[course].num_responses = len(obj['ratings'])
+
+	print('done')
+	return courses
