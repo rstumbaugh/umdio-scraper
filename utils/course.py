@@ -19,6 +19,20 @@ class Course:
 	def as_dict(self):
 		return self.__dict__
 
+def get_semester_name(code):
+  year = code[:4]
+  month = code[4:]
+  if month == '08':
+    month = 'Fall'
+  elif month == '12':
+    month = 'Winter'
+  elif month == '01':
+    month = 'Spring'
+  elif month == '05':
+    month = 'Summer'
+
+  return '{} {}'.format(month, year)
+
 def get_courses(semesters):
 	'''
 		Takes array of semester codes and returns dict
